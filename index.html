@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Трекер Подій НРК</title>
+    
+    <!-- DOCX бібліотеки з CDN -->
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    
+
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            * {
+                font-size: 13px;
+            }
+            
+            h1, h2, h3 {
+                font-size: 18px;
+            }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 2px;
+                background: white;
+                font-size: 13px;
+            }
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 8px;
+                border-radius: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+        }
+        
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #da190b;
+        }
+        
+        .btn-save {
+            background: #2196F3;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .btn-save:hover {
+            background: #0b7dda;
+        }
+        
+        .events-section {
+            margin-top: 30px;
+        }
+        
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .events-count {
+            color: #757575;
+            font-size: 14px;
+        }
+        
+        .events-list {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .event-card {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            position: relative;
+        }
+        
+        .event-card h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 16px;
+            padding-right: 40px;
+        }
+        
+        .delete-event-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        
+        .delete-event-btn:hover {
+            background: #da190b;
+        }
+        
+        .event-field {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .event-field strong {
+            color: #555;
+            min-width: 100px;
+            display: inline-block;
+        }
+        
+        .no-events {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .summary-section {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .summary-section h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .summary-item {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Трекер Подій (НРК)</h1>
+        
+        <div class="form-section">
+            <h2 style="margin-bottom: 20px; color: #333; font-size: 18px;">Інформація про екіпаж</h2>
+            
+            <div class="form-group">
+                <label>Назва позиції</label>
+                <input type="text" id="positionName" placeholder="Назва позиції">
+            </div>
+            
+            <div class="form-group">
+                <label>Координати позиції</label>
+                <input type="text" id="positionCoords" placeholder="ХХХ ХХ ХХХХХ ХХХХХ" maxlength="18" oninput="formatCoordinatesInputDirect(this)">
+            </div>
+            
+            <div class="form-group">
+                <label>Оператор</label>
+                <input type="text" id="operator" placeholder="звання Прізвище Ім'я По батькові">
+            </div>
+            
+            <div class="form-group">
+                <label>Другий пілот</label>
+                <input type="text" id="secondPilot" placeholder="звання Прізвище Ім'я По батькові">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2 style="margin-bottom: 20px; color: #333; font-size: 18px;">Додати нову подію</h2>
+            
+            <div class="form-group">
+                <label>Подія</label>
+                <select id="field1" onchange="toggleEventOther()">
+                    <option value="">Оберіть тип події</option>
+                    <option value="Доставка">Доставка</option>
+                    <option value="Евакуація">Евакуація</option>
+                    <option value="Евакуація свого НРК">Евакуація свого НРК</option>
+                    <option value="Мінування">Мінування</option>
+                    <option value="Застряг">Застряг</option>
+                    <option value="Втрачено">Втрачено</option>
+                    <option value="Розрядилась батарея">Розрядилась батарея</option>
+                    <option value="Підрив на міні">Підрив на міні</option>
+                    <option value="Ураження FPV">Ураження FPV</option>
+                    <option value="Інше">Інше</option>
+                </select>
+            </div>
+            
+            <!-- Додаткове поле для "Інше" події -->
+            <div class="form-group" id="eventOtherField" style="display: none;">
+                <label>Опис події</label>
+                <input type="text" id="eventOtherText" placeholder="Введіть опис події">
+            </div>
+            
+            <div class="form-group">
+                <label>Квадрат</label>
+                <input type="text" id="field2" placeholder="Назва квадрату">
+            </div>
+            
+            <div class="form-group">
+                <label>Координати</label>
+                <input type="text" id="field3" placeholder="ХХХ ХХ ХХХХХ ХХХХХ" maxlength="18" oninput="formatCoordinatesInputDirect(this)">
+            </div>
+            
+            <div class="form-group">
+                <label>Час відправлення</label>
+                <input type="text" id="field4" placeholder="ЧЧ:ХХ" maxlength="5" inputmode="numeric" oninput="formatTimeInputDirect(this)">
+            </div>
+            
+            <div class="form-group">
+                <label>Час повернення</label>
+                <input type="text" id="field5" placeholder="ЧЧ:ХХ" maxlength="5" inputmode="numeric" oninput="formatTimeInputDirect(this)">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="addEvent()">Зберегти подію</button>
+                <button class="btn-secondary" onclick="clearForm()">Очистити форму</button>
+                <button class="btn-save" onclick="saveToFile()">Завантажити звіт</button>
+            </div>
+        </div>
+        
+        <div class="events-section">
+            <div class="events-header">
+                <h2 style="color: #333; font-size: 18px;">Додані події</h2>
+                <span class="events-count" id="eventsCount">Всього: 0</span>
+            </div>
+            <div class="events-list" id="eventsList">
+                <div class="no-events">Поки що немає доданих подій</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 20px; color: #999; font-size: 10px;">
+        <div>Powered by CHEF</div>
+        <div>Ver: 1.0.0 NRK</div>
+    </div>
+
+    <script>
+        let events = [];
+        
+        function toggleEventOther() {
+            const eventType = document.getElementById('field1').value;
+            const eventOtherField = document.getElementById('eventOtherField');
+            
+            if (eventType === 'Інше') {
+                eventOtherField.style.display = 'block';
+            } else {
+                eventOtherField.style.display = 'none';
+            }
+        }
+        
+        function addEvent() {
+            const originalEventType = document.getElementById('field1').value;
+            let eventType = originalEventType;
+            
+            if (eventType === 'Інше') {
+                const otherText = document.getElementById('eventOtherText').value.trim();
+                if (otherText) {
+                    eventType = otherText;
+                } else {
+                    alert('⚠️ Введіть опис події!');
+                    return;
+                }
+            }
+            
+            const event = {
+                подія: eventType,
+                квадрат: document.getElementById('field2').value.trim(),
+                координати: document.getElementById('field3').value.trim(),
+                часВідправлення: document.getElementById('field4').value.trim(),
+                часПовернення: document.getElementById('field5').value.trim()
+            };
+            
+            const hasData = event.подія || event.квадрат || event.координати || 
+                           event.часВідправлення || event.часПовернення;
+            
+            if (!hasData) {
+                alert('Будь ласка, заповніть хоча б одне поле!');
+                return;
+            }
+            
+            events.push(event);
+            updateEventsList();
+            clearForm();
+            
+            const count = events.length;
+            alert(`✅ Подію #${count} додано!`);
+        }
+        
+        function formatCrewName(name) {
+            if (!name) return '';
+            
+            const rankPattern = /^(головний майстер-сержант|старший майстер-сержант|майстер-сержант|штаб-сержант|головний сержант|старший сержант|молодший сержант|сержант|старший солдат|солдат|рекрут|старший лейтенант|молодший лейтенант|лейтенант|капітан)\s+(.+)$/i;
+            
+            const match = name.trim().match(rankPattern);
+            
+            if (match) {
+                const rank = match[1].toLowerCase();
+                const rest = match[2].trim().split(/\s+/);
+                
+                if (rest.length === 0) return rank;
+                
+                const surname = rest[0].toUpperCase();
+                const otherNames = rest.slice(1).map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                );
+                
+                return [rank, surname, ...otherNames].join(' ');
+            }
+            
+            const words = name.trim().split(/\s+/);
+            if (words.length === 0) return '';
+            
+            const surname = words[0].toUpperCase();
+            const otherNames = words.slice(1).map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            );
+            
+            return [surname, ...otherNames].join(' ');
+        }
+        
+        function parseTime(timeStr) {
+            if (!timeStr || !timeStr.includes(':')) return 0;
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+        
+        function deleteEvent(index) {
+            if (confirm(`Ви впевнені, що хочете видалити подію #${index + 1}?`)) {
+                events.splice(index, 1);
+                updateEventsList();
+                alert('✅ Подію видалено!');
+            }
+        }
+        
+        function clearForm() {
+            document.getElementById('field1').value = '';
+            document.getElementById('field2').value = '';
+            document.getElementById('field3').value = '';
+            document.getElementById('field4').value = '';
+            document.getElementById('field5').value = '';
+            document.getElementById('eventOtherField').style.display = 'none';
+            document.getElementById('eventOtherText').value = '';
+        }
+        
+        function clearCrewInfo() {
+            document.getElementById('positionName').value = '';
+            document.getElementById('positionCoords').value = '';
+            document.getElementById('operator').value = '';
+            document.getElementById('secondPilot').value = '';
+        }
+        
+        function updateEventsList() {
+            const listDiv = document.getElementById('eventsList');
+            const countSpan = document.getElementById('eventsCount');
+            
+            countSpan.textContent = `Всього: ${events.length}`;
+            
+            if (events.length === 0) {
+                listDiv.innerHTML = '<div class="no-events">Поки що немає доданих подій</div>';
+                return;
+            }
+            
+            let html = '';
+            events.forEach((event, index) => {
+                html += `
+                    <div class="event-card">
+                        <button class="delete-event-btn" onclick="deleteEvent(${index})">✕</button>
+                        <h3>Подія #${index + 1}</h3>
+                        <div class="event-field"><strong>подія:</strong> ${event.подія || '—'}</div>
+                        <div class="event-field"><strong>квадрат:</strong> ${event.квадрат || '—'}</div>
+                        <div class="event-field"><strong>координати:</strong> ${event.координати || '—'}</div>
+                        <div class="event-field"><strong>час відправлення:</strong> ${event.часВідправлення || '—'}</div>
+                        <div class="event-field"><strong>час повернення:</strong> ${event.часПовернення || '—'}</div>
+                    </div>
+                `;
+            });
+            
+            // Підсумок подій
+            html += generateEventSummary();
+            
+            listDiv.innerHTML = html;
+        }
+        
+        function generateEventSummary() {
+            const eventCounts = {};
+            events.forEach(event => {
+                const type = event.подія || 'Невідомо';
+                eventCounts[type] = (eventCounts[type] || 0) + 1;
+            });
+            
+            if (Object.keys(eventCounts).length === 0) return '';
+            
+            let html = '<div class="summary-section">';
+            html += '<h4>Підсумок подій:</h4>';
+            
+            Object.keys(eventCounts).forEach(type => {
+                html += `<div class="summary-item">- ${type}: ${eventCounts[type]}</div>`;
+            });
+            
+            html += `<div class="summary-item" style="margin-top: 8px; font-weight: 600;">Всього виїздів: ${events.length}</div>`;
+            html += '</div>';
+            
+            return html;
+        }
+        
+        function saveToFile() {
+            if (events.length === 0) {
+                alert('⚠️ Немає подій для збереження!');
+                return;
+            }
+            
+            if (typeof docx !== 'undefined' || typeof window.docx !== 'undefined') {
+                saveToFileDOCX();
+            } else {
+                saveToFileHTML();
+            }
+        }
+        
+        async function saveToFileDOCX() {
+            if (typeof docx === 'undefined' && typeof window.docx === 'undefined') {
+                saveToFileHTML();
+                return;
+            }
+            
+            const docxLib = typeof docx !== 'undefined' ? docx : window.docx;
+            
+            try {
+                const { Document, Paragraph, TextRun, AlignmentType, UnderlineType, convertInchesToTwip } = docxLib;
+            
+            const positionName = document.getElementById('positionName').value.trim() || '—';
+            const positionCoords = document.getElementById('positionCoords').value.trim();
+            const operator = document.getElementById('operator').value.trim();
+            const secondPilot = document.getElementById('secondPilot').value.trim();
+            
+            const totalEventsCount = events.length;
+            const timesText = declineTimes(totalEventsCount);
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '.');
+            
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '.');
+            
+            const coordsText = positionCoords ? ` (${positionCoords})` : '';
+            
+            // Підрахунок подій за типом
+            const eventCounts = {};
+            events.forEach(event => {
+                const type = event.подія || '';
+                eventCounts[type] = (eventCounts[type] || 0) + 1;
+            });
+            
+            const paragraphs = [];
+            
+            // ЗАГОЛОВОК
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "    РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ №__:",
+                    bold: true,
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // 1. Час виконання
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: `1. Час виконання завдання: з 16:00 ${yesterdayStr} по 16:00 ${dateStr}р`,
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // 2. Напрямок
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "2. Напрямок виконання завдання: р-н Солодке, р-н Рівнопілля, р-н Нове запоріжжя.",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // 3. Задіяно сил
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "3. Задіяно сил до виконання завдання:",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "    Екіпажів - 1",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "    Бортів - 1",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: `    Кількість виїздів - ${totalEventsCount}`,
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // 4. Результати
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "4. Результати виконання завдання за добу:",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // Перелік типів подій для звіту
+            const reportEventTypes = ['Доставка', 'Евакуація', 'Мінування'];
+            reportEventTypes.forEach(type => {
+                const count = eventCounts[type] || 0;
+                if (count > 0) {
+                    paragraphs.push(new Paragraph({
+                        children: [new TextRun({
+                            text: `    ${type} – ${count}`,
+                            font: "Times New Roman",
+                            size: 24
+                        })],
+                        spacing: { after: 120 }
+                    }));
+                }
+            });
+            
+            // Інші типи подій (які не в основному переліку)
+            const otherTypes = Object.keys(eventCounts).filter(t => !reportEventTypes.includes(t));
+            otherTypes.forEach(type => {
+                const count = eventCounts[type];
+                if (count > 0) {
+                    paragraphs.push(new Paragraph({
+                        children: [new TextRun({
+                            text: `    ${type} – ${count}`,
+                            font: "Times New Roman",
+                            size: 24
+                        })],
+                        spacing: { after: 120 }
+                    }));
+                }
+            });
+            
+            // Проблемні питання
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "Проблемні питання: ворожі ФПВ,",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            // Заплановані дії
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({
+                    text: "Заплановані дії:",
+                    font: "Times New Roman",
+                    size: 24
+                })],
+                spacing: { after: 120 }
+            }));
+            
+            paragraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
+            paragraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
+            
+            // ДРУГА ЧАСТИНА ЗВІТУ
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({
+                        text: `    РБНС ТЗП НРК «${positionName}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}`,
+                        bold: true,
+                        font: "Times New Roman",
+                        size: 24
+                    })
+                ],
+                spacing: { after: 120 }
+            }));
+            
+            if (operator) {
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: `    командир екіпажу/пілот – ${formatCrewName(operator)}`, font: "Times New Roman", size: 24 })],
+                    spacing: { after: 120 }
+                }));
+            }
+            if (secondPilot) {
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: `    оператор БПлА – ${formatCrewName(secondPilot)}`, font: "Times New Roman", size: 24 })],
+                    spacing: { after: 240 }
+                }));
+            } else {
+                paragraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
+            }
+            
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ 
+                    text: `Протягом звітного періоду з 16:00 ${yesterdayStr}р. по 16:00 ${dateStr}р. було здійснено наступне:`, 
+                    font: "Times New Roman", 
+                    size: 24
+                })],
+                spacing: { after: 240 }
+            }));
+            
+            // Сортуємо за часом відправлення
+            const sortedEvents = [...events].sort((a, b) => {
+                const timeA = parseTime(a.часВідправлення || '00:00');
+                const timeB = parseTime(b.часВідправлення || '00:00');
+                return timeA - timeB;
+            });
+            
+            sortedEvents.forEach(event => {
+                let eventTypeLower = event.подія.toLowerCase();
+                const timeDep = event.часВідправлення || 'хх:хх';
+                const timeRet = event.часПовернення || '';
+                const coordsText = event.координати ? ` за координатами (${event.координати})` : ' за координатами (ХХХ ХХ ХХХХХ ХХХХХ)';
+                
+                let timeRange = timeDep;
+                if (timeRet) {
+                    timeRange = `${timeDep}-${timeRet}`;
+                }
+                
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ 
+                        text: `${timeRange} – ${eventTypeLower}${coordsText}`, 
+                        font: "Times New Roman", 
+                        size: 24 
+                    })],
+                    spacing: { after: 120 }
+                }));
+            });
+            
+            paragraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
+            
+            const doc = new Document({
+                sections: [{
+                    properties: {
+                        page: {
+                            margin: {
+                                top: convertInchesToTwip(1),
+                                right: convertInchesToTwip(1),
+                                bottom: convertInchesToTwip(1),
+                                left: convertInchesToTwip(1)
+                            }
+                        }
+                    },
+                    children: paragraphs
+                }]
+            });
+            
+            const blob = await docxLib.Packer.toBlob(doc);
+            const positionFileName = positionName.replace(/[^a-zA-Zа-яА-ЯіІїЇєЄ0-9]/g, '_');
+            
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const fileDate = `${day}-${month}-${year}`;
+            
+            saveAs(blob, `НРК_${positionFileName}_${fileDate}.docx`);
+            console.log('DOCX file generated successfully');
+            
+            events = [];
+            updateEventsList();
+            clearForm();
+            clearCrewInfo();
+            
+            } catch (error) {
+                console.error('Error generating DOCX:', error);
+                alert('⚠️ Помилка при створенні DOCX файлу: ' + error.message);
+            }
+        }
+        
+        function saveToFileHTML() {
+            if (events.length === 0) {
+                alert('⚠️ Немає подій для збереження!');
+                return;
+            }
+            
+            const positionName = document.getElementById('positionName').value.trim() || '—';
+            const positionCoords = document.getElementById('positionCoords').value.trim();
+            const operator = document.getElementById('operator').value.trim();
+            const secondPilot = document.getElementById('secondPilot').value.trim();
+            
+            const totalEventsCount = events.length;
+            const timesText = declineTimes(totalEventsCount);
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+            
+            const coordsText = positionCoords ? ` (${positionCoords})` : '';
+            
+            const eventCounts = {};
+            events.forEach(event => {
+                const type = event.подія || '';
+                eventCounts[type] = (eventCounts[type] || 0) + 1;
+            });
+            
+            let html = `<html><head><meta charset='utf-8'><style>
+                body { font-family: 'Times New Roman'; font-size: 12pt; }
+                p { margin: 2pt 0; }
+            </style></head><body>
+            
+<p><b>РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ №__:</b></p>
+
+<p>1. Час виконання завдання: з 16:00 ${yesterdayStr} по 16:00 ${dateStr}р</p>
+
+<p>2. Напрямок виконання завдання: р-н Солодке, р-н Рівнопілля, р-н Нове запоріжжя.</p>
+
+<p>3. Задіяно сил до виконання завдання:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;Екіпажів - 1</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;Бортів - 1</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;Кількість виїздів - ${totalEventsCount}</p>
+
+<p>4. Результати виконання завдання за добу:</p>`;
+
+            const reportEventTypes = ['Доставка', 'Евакуація', 'Мінування'];
+            reportEventTypes.forEach(type => {
+                const count = eventCounts[type] || 0;
+                if (count > 0) {
+                    html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;${type} – ${count}</p>\n`;
+                }
+            });
+            
+            const otherTypes = Object.keys(eventCounts).filter(t => !reportEventTypes.includes(t));
+            otherTypes.forEach(type => {
+                const count = eventCounts[type];
+                if (count > 0) {
+                    html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;${type} – ${count}</p>\n`;
+                }
+            });
+
+            html += `<p>Проблемні питання: ворожі ФПВ,</p>
+<p>Заплановані дії:</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>`;
+
+            html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>РБНС ТЗП НРК «${positionName}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}</b></p>\n`;
+            
+            if (operator) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;командир екіпажу/пілот – ${formatCrewName(operator)}</p>\n`;
+            if (secondPilot) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;оператор БПлА – ${formatCrewName(secondPilot)}</p>\n`;
+            
+            html += `<p>&nbsp;</p>\n`;
+            html += `<p>Протягом звітного періоду з 16:00 ${yesterdayStr}р. по 16:00 ${dateStr}р. було здійснено наступне:</p>\n`;
+            
+            const sortedEvents = [...events].sort((a, b) => {
+                const timeA = parseTime(a.часВідправлення || '00:00');
+                const timeB = parseTime(b.часВідправлення || '00:00');
+                return timeA - timeB;
+            });
+            
+            sortedEvents.forEach(event => {
+                const timeDep = event.часВідправлення || 'хх:хх';
+                const timeRet = event.часПовернення || '';
+                let eventTypeLower = event.подія.toLowerCase();
+                const coordsText = event.координати ? ` за координатами (${event.координати})` : ' за координатами (ХХХ ХХ ХХХХХ ХХХХХ)';
+                
+                let timeRange = timeDep;
+                if (timeRet) {
+                    timeRange = `${timeDep}-${timeRet}`;
+                }
+                
+                html += `<p>${timeRange} – ${eventTypeLower}${coordsText}</p>\n`;
+            });
+            
+            html += `</body></html>`;
+            
+            const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const fileDate = `${day}-${month}-${year}`;
+            
+            link.download = `НРК_${positionName}_${fileDate}.doc`;
+            link.click();
+            
+            events = [];
+            updateEventsList();
+            clearForm();
+            clearCrewInfo();
+        }
+        
+        // --- Утиліти ---
+        
+        function formatTimeInputDirect(field) {
+            let cursorPos = field.selectionStart;
+            let oldValue = field.value;
+            
+            let digits = field.value.replace(/\D/g, '');
+            
+            if (digits.length > 4) {
+                digits = digits.slice(0, 4);
+            }
+            
+            let formatted = '';
+            if (digits.length >= 1) {
+                formatted = digits.slice(0, 2);
+            }
+            if (digits.length >= 3) {
+                formatted = digits.slice(0, 2) + ':' + digits.slice(2, 4);
+            }
+            
+            field.value = formatted;
+            
+            if (oldValue.length < formatted.length && cursorPos === 2) {
+                field.setSelectionRange(3, 3);
+            }
+        }
+        
+        function formatCoordinatesInputDirect(field) {
+            formatCoordinatesInput(field);
+        }
+        
+        function formatCoordinatesInput(eventOrField) {
+            const field = eventOrField.target ? eventOrField.target : eventOrField;
+            
+            const cyrToLat = {
+                'А': 'A', 'В': 'B', 'С': 'C', 'Е': 'E', 'Н': 'H', 'К': 'K', 
+                'М': 'M', 'О': 'O', 'Р': 'P', 'Т': 'T', 'Х': 'X', 'У': 'Y',
+                'а': 'A', 'в': 'B', 'с': 'C', 'е': 'E', 'н': 'H', 'к': 'K',
+                'м': 'M', 'о': 'O', 'р': 'P', 'т': 'T', 'х': 'X', 'у': 'Y'
+            };
+            
+            let rawValue = field.value;
+            for (let cyr in cyrToLat) {
+                rawValue = rawValue.replace(new RegExp(cyr, 'g'), cyrToLat[cyr]);
+            }
+            
+            let value = rawValue.replace(/\s/g, '');
+            
+            if (value.length === 0) {
+                field.value = '';
+                return;
+            }
+            
+            let formatted = '';
+            
+            for (let i = 0; i < value.length && i < 15; i++) {
+                const char = value[i].toUpperCase();
+                
+                if (i < 2) {
+                    if (/\d/.test(char)) {
+                        formatted += char;
+                    }
+                } else if (i === 2) {
+                    if (/[A-Z]/.test(char)) {
+                        formatted += char;
+                    }
+                } else if (i >= 3 && i < 5) {
+                    if (/[A-Z]/.test(char)) {
+                        formatted += char;
+                    }
+                } else {
+                    if (/\d/.test(char)) {
+                        formatted += char;
+                    }
+                }
+            }
+            
+            let result = '';
+            if (formatted.length > 0) {
+                result = formatted.slice(0, 3);
+            }
+            if (formatted.length >= 4) {
+                result += ' ' + formatted.slice(3, 5);
+            }
+            if (formatted.length >= 6) {
+                result += ' ' + formatted.slice(5, 10);
+            }
+            if (formatted.length >= 11) {
+                result += ' ' + formatted.slice(10, 15);
+            }
+            
+            field.value = result;
+        }
+        
+        function declineTimes(count) {
+            const lastDigit = count % 10;
+            const lastTwoDigits = count % 100;
+            
+            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+                return 'разів';
+            }
+            
+            if (lastDigit === 1) {
+                return 'раз';
+            }
+            
+            if (lastDigit >= 2 && lastDigit <= 4) {
+                return 'рази';
+            }
+            
+            return 'разів';
+        }
+        
+        window.onload = function() {
+            const coordFields = ['positionCoords', 'field3'];
+            coordFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.addEventListener('input', function(e) {
+                    setTimeout(() => formatCoordinatesInput(field), 0);
+                });
+            });
+        };
+    </script>
+</body>
+</html>
