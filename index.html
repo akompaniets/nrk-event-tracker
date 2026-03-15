@@ -284,6 +284,11 @@
             </div>
             
             <div class="form-group">
+                <label>Командир екіпажу</label>
+                <input type="text" id="crewCommander" placeholder="звання Прізвище Ім'я По батькові">
+            </div>
+            
+            <div class="form-group">
                 <label>Оператор</label>
                 <input type="text" id="operator" placeholder="звання Прізвище Ім'я По батькові">
             </div>
@@ -360,7 +365,7 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 20px; color: #999; font-size: 10px;">
         <div>Powered by CHEF</div>
-        <div>Ver: 1.0.0 NRK</div>
+        <div>Ver: 1.0.1 NRK</div>
     </div>
 
     <script>
@@ -474,6 +479,7 @@
         function clearCrewInfo() {
             document.getElementById('positionName').value = '';
             document.getElementById('positionCoords').value = '';
+            document.getElementById('crewCommander').value = '';
             document.getElementById('operator').value = '';
             document.getElementById('secondPilot').value = '';
         }
@@ -558,6 +564,7 @@
             
             const positionName = document.getElementById('positionName').value.trim() || '—';
             const positionCoords = document.getElementById('positionCoords').value.trim();
+            const crewCommander = document.getElementById('crewCommander').value.trim();
             const operator = document.getElementById('operator').value.trim();
             const secondPilot = document.getElementById('secondPilot').value.trim();
             
@@ -725,15 +732,21 @@
                 spacing: { after: 120 }
             }));
             
+            if (crewCommander) {
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: `    командир екіпажу – ${formatCrewName(crewCommander)}`, font: "Times New Roman", size: 24 })],
+                    spacing: { after: 120 }
+                }));
+            }
             if (operator) {
                 paragraphs.push(new Paragraph({
-                    children: [new TextRun({ text: `    командир екіпажу/пілот – ${formatCrewName(operator)}`, font: "Times New Roman", size: 24 })],
+                    children: [new TextRun({ text: `    оператор – ${formatCrewName(operator)}`, font: "Times New Roman", size: 24 })],
                     spacing: { after: 120 }
                 }));
             }
             if (secondPilot) {
                 paragraphs.push(new Paragraph({
-                    children: [new TextRun({ text: `    оператор БПлА – ${formatCrewName(secondPilot)}`, font: "Times New Roman", size: 24 })],
+                    children: [new TextRun({ text: `    другий пілот – ${formatCrewName(secondPilot)}`, font: "Times New Roman", size: 24 })],
                     spacing: { after: 240 }
                 }));
             } else {
@@ -825,6 +838,7 @@
             
             const positionName = document.getElementById('positionName').value.trim() || '—';
             const positionCoords = document.getElementById('positionCoords').value.trim();
+            const crewCommander = document.getElementById('crewCommander').value.trim();
             const operator = document.getElementById('operator').value.trim();
             const secondPilot = document.getElementById('secondPilot').value.trim();
             
@@ -886,8 +900,9 @@
 
             html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>РБНС ТЗП НРК «${positionName}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}</b></p>\n`;
             
-            if (operator) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;командир екіпажу/пілот – ${formatCrewName(operator)}</p>\n`;
-            if (secondPilot) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;оператор БПлА – ${formatCrewName(secondPilot)}</p>\n`;
+            if (crewCommander) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;командир екіпажу – ${formatCrewName(crewCommander)}</p>\n`;
+            if (operator) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;оператор – ${formatCrewName(operator)}</p>\n`;
+            if (secondPilot) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;другий пілот – ${formatCrewName(secondPilot)}</p>\n`;
             
             html += `<p>&nbsp;</p>\n`;
             html += `<p>Протягом звітного періоду з 16:00 ${yesterdayStr}р. по 16:00 ${dateStr}р. було здійснено наступне:</p>\n`;
