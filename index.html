@@ -365,7 +365,7 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 20px; color: #999; font-size: 10px;">
         <div>Powered by CHEF</div>
-        <div>Ver: 1.0.1 NRK</div>
+        <div>Ver: 1.0.2 NRK</div>
     </div>
 
     <script>
@@ -592,7 +592,7 @@
             // ЗАГОЛОВОК
             paragraphs.push(new Paragraph({
                 children: [new TextRun({
-                    text: "    РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ №__:",
+                    text: "    РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ:",
                     bold: true,
                     font: "Times New Roman",
                     size: 24
@@ -723,7 +723,7 @@
             paragraphs.push(new Paragraph({
                 children: [
                     new TextRun({
-                        text: `    РБНС ТЗП НРК «${positionName}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}`,
+                        text: `    НРК «${positionName.toUpperCase()}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}`,
                         bold: true,
                         font: "Times New Roman",
                         size: 24
@@ -747,10 +747,8 @@
             if (secondPilot) {
                 paragraphs.push(new Paragraph({
                     children: [new TextRun({ text: `    другий пілот – ${formatCrewName(secondPilot)}`, font: "Times New Roman", size: 24 })],
-                    spacing: { after: 240 }
+                    spacing: { after: 120 }
                 }));
-            } else {
-                paragraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
             }
             
             paragraphs.push(new Paragraph({
@@ -864,7 +862,7 @@
                 p { margin: 2pt 0; }
             </style></head><body>
             
-<p><b>РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ №__:</b></p>
+<p><b>РБНС 1 ОШП ПІДСУМКОВЕ ДОНЕСЕННЯ:</b></p>
 
 <p>1. Час виконання завдання: з 16:00 ${yesterdayStr} по 16:00 ${dateStr}р</p>
 
@@ -898,13 +896,11 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>`;
 
-            html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>РБНС ТЗП НРК «${positionName}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}</b></p>\n`;
+            html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;<b>НРК «${positionName.toUpperCase()}»${coordsText} було здійснено виїздів – ${totalEventsCount} ${timesText}</b></p>\n`;
             
             if (crewCommander) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;командир екіпажу – ${formatCrewName(crewCommander)}</p>\n`;
             if (operator) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;оператор – ${formatCrewName(operator)}</p>\n`;
             if (secondPilot) html += `<p>&nbsp;&nbsp;&nbsp;&nbsp;другий пілот – ${formatCrewName(secondPilot)}</p>\n`;
-            
-            html += `<p>&nbsp;</p>\n`;
             html += `<p>Протягом звітного періоду з 16:00 ${yesterdayStr}р. по 16:00 ${dateStr}р. було здійснено наступне:</p>\n`;
             
             const sortedEvents = [...events].sort((a, b) => {
